@@ -1,0 +1,48 @@
+version: "3.6"
+
+services:
+  web:
+    build: ./container-webserver
+    volumes:
+      - type: volume
+        source: audiodata
+        target: /audiovolume
+      - type: volume
+        source: shareddata
+        target: /sharedvolume
+    ports:
+      - 80:80
+
+  playerdaemon:
+    build: ./container-playerdaemon
+    volumes:
+      - type: volume
+        source: shareddata
+        target: /mpd/data
+      - type: volume
+        source: audiodata
+        target: /mpd/music
+    devices:
+      - "/dev/snd:/dev/snd"
+    ports:
+      - 8000:8000
+      - 6600
+
+  fileserver:
+    build: ./container-fileserver
+    volumes:
+      - type: volume
+        source: shareddata
+        target: /sharedvolume
+      - type: volume
+        source: audiodata
+        target: /var/lib/samba
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+
+volumes:
+  audiodata:
+  shareddata:
